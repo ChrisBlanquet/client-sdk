@@ -20,7 +20,7 @@ public class FeignInterceptorConfig {
     public RequestInterceptor requestInterceptor() {
         return template -> {
             // 1. REGLA DE ORO: No interceptar la propia petición de Login del Bot
-            // Si la ruta contiene "/login", la dejamos salir sin token
+            // Si la ruta contiene "/login", se permite salir sin token
             if (template.url().contains("/login")) {
                 log.debug("Petición de login detectada. Dejando pasar sin token...");
                 return; 
@@ -29,10 +29,10 @@ public class FeignInterceptorConfig {
                 String token = botAuthService.getValidToken();
                 if (token != null && !token.isEmpty()) {
                     template.header("Authorization", "Bearer " + token);
-                    log.debug("🛡️ Token inyectado exitosamente en la petición hacia: {}", template.url());
+                    log.debug("🛡Token inyectado exitosamente en la petición hacia: {}", template.url());
                 }
             } catch (Exception e) {
-                log.error("⚠️ Error crítico: No se pudo inyectar el token en Feign. {}", e.getMessage());
+                log.error("⚠Error crítico: No se pudo inyectar el token en Feign. {}", e.getMessage());
             }
         };
     }

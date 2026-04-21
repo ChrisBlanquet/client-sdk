@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class BotAuthService {
 
     private final LoginClient loginClient;
-    private final JwtTokenProvider jwtProvider; // ¡Inyectado desde la security-lib!
+    private final JwtTokenProvider jwtProvider;
 
     @Value("${bot.security.username}")
     private String botUsername;
@@ -42,18 +42,18 @@ public class BotAuthService {
     private void renovarToken() {
         try {
             LoginRequest request = LoginRequest.builder()
-                    .username(botUsername.trim())
+                    .email(botUsername.trim())
                     .password(botPassword.trim())
                     .build();
 
             TokenResponse response = loginClient.login(request);
             
-            if (response != null && response.token() != null) {
-                this.currentToken = response.token();
-                log.info("✅ Bot de Sistema: Token renovado exitosamente.");
+            if (response != null && response.accessToken() != null) {
+                this.currentToken = response.accessToken();
+                log.info("Bot de Sistema: Token renovado exitosamente.");
             }
         } catch (Exception e) {
-            log.error("❌ Error Crítico: El Bot no pudo autenticarse con el micro de Auth. {}", e.getMessage());
+            log.error("Error Crítico: El Bot no pudo autenticarse con el micro de Auth. {}", e.getMessage());
             this.currentToken = null;
             throw new RuntimeException("Fallo en la autenticación del Bot SDK");
         }
@@ -63,7 +63,7 @@ public class BotAuthService {
      * Permite invalidar el token actual manualmente si otro servicio detecta un 401
      */
     public void forzarRenovacion() {
-        log.warn("⚠️ Forzando la invalidación del token del Bot...");
+        log.warn("Forzando la invalidación del token del Bot...");
         this.currentToken = null;
     }
 }
